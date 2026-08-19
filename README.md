@@ -1,5 +1,7 @@
 # Kroky — Workout Session Player
 
+*This README is AI-generated; it may include wrong information.*
+
 A native iOS workout player built with SwiftUI and AVFoundation. Kroky streams a
 guided, video-led workout: it downloads each exercise clip, runs pre-clip
 countdowns, tracks progress and calories, and lands on an animated summary — with
@@ -10,7 +12,7 @@ graceful handling for the moments a video fails to load.
 ## Screens
 
 | Detail | In progress / Completed | Countdown | Player | Error | Summary |
-|--------|-------------------------|-----------|--------|-------|---------|
+| --- | --- | --- | --- | --- | --- |
 | Start a workout | Resume or review | "Get ready" pre-roll | Video + controls | Retry on failure | Logged result |
 
 ## How playback works
@@ -27,25 +29,27 @@ preparing → countdown → playing → (next segment) … → completed
                 └──────── failed ────────┘
 ```
 
-- **`preparing`** — the next clip's video is fetched from cache (or downloaded),
+- `preparing` — the next clip's video is fetched from cache (or downloaded),
   the asset is validated (`isPlayable`, finite non-zero duration), loaded into the
   shared `AVPlayer`, and seeked to the resume position.
-- **`countdown`** — playback is held while an on-screen number ticks down.
+- `countdown` — playback is held while an on-screen number ticks down.
   The **first** clip gets a **10s** countdown; every subsequent clip gets **3s**.
-- **`playing`** — the `AVPlayer` plays the clip. A periodic time observer updates
+- `playing` — the `AVPlayer` plays the clip. A periodic time observer updates
   the progress bar, elapsed time, and calories (`kcalPerMinute × elapsed`). When the
   item plays to the end, the segment is marked complete and the next one prepares.
-- **`failed`** — any load/playback error routes here. Progress is preserved;
+- `failed` — any load/playback error routes here. Progress is preserved;
   **Try again** invalidates the cached file and re-downloads from the same position.
-- **`completed`** — all segments done; a summary with the mascot animation is shown.
+- `completed` — all segments done; a summary with the mascot animation is shown.
 
 ### Interactions
+
 - **Tap anywhere** toggles pause (works during both countdown and playback).
 - **Skip / previous** jump between clips; previous is disabled on the first clip.
 - **Backgrounding the app** auto-pauses the session.
 - **Close (✕)** persists progress so the workout can be resumed later.
 
 ### Countdown sound (optional feature, implemented)
+
 `CountdownSoundPlayer` synthesizes its cues at runtime — no audio assets. A short
 pip plays on each of the final **3** seconds, and a brighter two-note "go" cue fires
 when playback begins. All audio work runs on a private serial queue (off the main

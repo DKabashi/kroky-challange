@@ -14,9 +14,6 @@ struct RosyStatePill: View {
             Text(title)
                 .font(.system(size: 17, weight: .bold))
                 .foregroundStyle(KrokyColor.charcoal)
-
-            KrokyIconView(icon: .info, size: 17, weight: .semibold)
-                .foregroundStyle(KrokyColor.mutedGray)
         }
         .padding(.leading, 16)
         .padding(.trailing, 14)
