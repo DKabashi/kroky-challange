@@ -1,0 +1,52 @@
+{
+  "id": "standing-balance-flow",
+  "eyebrow": "Today",
+  "title": "Standing balance flow",
+  "heroImageName": "WorkoutHero",
+  "overview": {
+    "title": "In today’s workout",
+    "description": "Slow standing moves that tone legs and improve balance, all supported by the wall. No mat, no jumping, kind to your knees.",
+    "metrics": [
+      {
+        "value": "8 min",
+        "label": "Duration"
+      },
+      {
+        "value": "Light",
+        "label": "Intensity"
+      },
+      {
+        "value": "~65",
+        "label": "kcal burned"
+      }
+    ]
+  },
+  "roundCount": 2,
+  "exercises": [
+    {
+      "id": "wall-supported-standing-march",
+      "title": "Wall-supported standing march",
+      "duration": "1 min",
+      "imageName": "WorkoutHero"
+    },
+    {
+      "id": "arm-reach-and-calf-raise",
+      "title": "Arm reach and calf raise",
+      "duration": "1 min",
+      "imageName": "WorkoutHero"
+    },
+    {
+      "id": "front-kick-hold-left",
+      "title": "Front kick hold, left",
+      "duration": "1 min",
+      "imageName": "WorkoutHero"
+    },
+    {
+      "id": "front-kick-hold-right",
+      "title": "Front kick hold, right",
+      "duration": "1 min",
+      "imageName": "WorkoutHero"
+    }
+  ],
+  "callToActionTitle": "Start workout"
+}
