@@ -28,6 +28,9 @@ enum KrokyColor {
     static let hairline = charcoal.opacity(0.05)
     static let dim = charcoal.opacity(0.30)
     static let glass = charcoal.opacity(0.82)
+    static let playerBackground = Color(hex: 0x151219)
+    static let playerMuted = Color(hex: 0xC4BEC3)
+    static let playerProgress = Color(hex: 0xF0629A)
 
     enum Metric {
         static let calories = KrokyColor.deepRoseText

@@ -35,6 +35,7 @@ enum KrokyIcon: String, CaseIterable, Identifiable {
     case thumbUp
     case tune
     case vibration
+    case videoOff
     case water
     case wifiOff
 
@@ -71,6 +72,7 @@ enum KrokyIcon: String, CaseIterable, Identifiable {
         case .thumbUp: filled ? "hand.thumbsup.fill" : "hand.thumbsup"
         case .tune: "slider.horizontal.3"
         case .vibration: "wave.3.right"
+        case .videoOff: "video.slash"
         case .water: filled ? "drop.fill" : "drop"
         case .wifiOff: "wifi.slash"
         }

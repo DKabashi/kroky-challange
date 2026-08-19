@@ -12,6 +12,7 @@ struct WorkoutDetailView: View {
     let workout: Workout
 
     @State private var scrollOffset: CGFloat = 0
+    @State private var isPlayerPresented = false
 
     var body: some View {
         GeometryReader { geometry in
@@ -49,6 +50,12 @@ struct WorkoutDetailView: View {
             .ignoresSafeArea()
         }
         .foregroundStyle(KrokyColor.charcoal)
+        .task(id: workout.id) {
+            await RemoteVideoCache.shared.prefetch(workout.videoResources)
+        }
+        .fullScreenCover(isPresented: $isPlayerPresented) {
+            WorkoutPlayerView(workout: workout)
+        }
     }
 
     private func heroTitleTopInset(safeAreaTop: CGFloat) -> CGFloat {
@@ -92,7 +99,7 @@ struct WorkoutDetailView: View {
 
     private var workoutSheet: some View {
         VStack(spacing: 14) {
-            WorkoutSummaryCard(overview: workout.overview)
+            WorkoutSummaryCard(overview: workout.displayOverview)
             ExerciseListCard(
                 summary: workout.exerciseSummary,
                 exercises: workout.exercises
@@ -112,7 +119,9 @@ struct WorkoutDetailView: View {
     }
 
     private var startButton: some View {
-        Button(action: {}) {
+        Button {
+            isPlayerPresented = true
+        } label: {
             HStack(spacing: 12) {
                 KrokyIconView(icon: .play, size: 16, weight: .bold, filled: true)
                 Text(workout.callToActionTitle)
@@ -124,7 +133,7 @@ struct WorkoutDetailView: View {
             .background(KrokyColor.charcoal, in: Capsule())
         }
         .buttonStyle(.plain)
-        .accessibilityHint("Workout playback is not available yet")
+        .accessibilityHint("Opens the workout player")
     }
 }
 

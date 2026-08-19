@@ -1,14 +1,14 @@
 {
-  "id": "standing-balance-flow",
+  "id": "pilates-workout",
   "eyebrow": "Today",
-  "title": "Standing balance flow",
+  "title": "Pilates workout",
   "heroImageName": "WorkoutHero",
   "overview": {
     "title": "In today’s workout",
-    "description": "Slow standing moves that tone legs and improve balance, all supported by the wall. No mat, no jumping, kind to your knees.",
+    "description": "Four beginner-friendly Pilates exercises focused on strength and control. Complete each 15-second move twice.",
     "metrics": [
       {
-        "value": "8 min",
+        "value": "2 min",
         "label": "Duration"
       },
       {
@@ -16,7 +16,7 @@
         "label": "Intensity"
       },
       {
-        "value": "~65",
+        "value": "~25",
         "label": "kcal burned"
       }
     ]
@@ -24,28 +24,52 @@
   "roundCount": 2,
   "exercises": [
     {
-      "id": "wall-supported-standing-march",
-      "title": "Wall-supported standing march",
-      "duration": "1 min",
-      "imageName": "WorkoutHero"
+      "id": "p-001",
+      "title": "Standing Squats",
+      "duration": "15 sec",
+      "durationSeconds": 15.042,
+      "imageName": "WorkoutHero",
+      "videoURL": "https://workoutvideos.vercel.app/p-001.mp4",
+      "videoVersion": 1,
+      "kcalPerMinute": 12.1,
+      "style": "Pilates",
+      "difficulty": 1
     },
     {
-      "id": "arm-reach-and-calf-raise",
-      "title": "Arm reach and calf raise",
-      "duration": "1 min",
-      "imageName": "WorkoutHero"
+      "id": "p-002",
+      "title": "Flat Ab Crunches",
+      "duration": "15 sec",
+      "durationSeconds": 15.042,
+      "imageName": "WorkoutHero",
+      "videoURL": "https://workoutvideos.vercel.app/p-002.mp4",
+      "videoVersion": 1,
+      "kcalPerMinute": 14.0,
+      "style": "Pilates",
+      "difficulty": 1
     },
     {
-      "id": "front-kick-hold-left",
-      "title": "Front kick hold, left",
-      "duration": "1 min",
-      "imageName": "WorkoutHero"
+      "id": "p-003",
+      "title": "Pushups",
+      "duration": "15 sec",
+      "durationSeconds": 15.042,
+      "imageName": "WorkoutHero",
+      "videoURL": "https://workoutvideos.vercel.app/p-003.mp4",
+      "videoVersion": 1,
+      "kcalPerMinute": 12.5,
+      "style": "Pilates",
+      "difficulty": 1
     },
     {
-      "id": "front-kick-hold-right",
-      "title": "Front kick hold, right",
-      "duration": "1 min",
-      "imageName": "WorkoutHero"
+      "id": "p-004",
+      "title": "Lunges",
+      "duration": "15 sec",
+      "durationSeconds": 15.042,
+      "imageName": "WorkoutHero",
+      "videoURL": "https://workoutvideos.vercel.app/p-004.mp4",
+      "videoVersion": 1,
+      "kcalPerMinute": 11.4,
+      "style": "Pilates",
+      "difficulty": 1
     }
   ],
   "callToActionTitle": "Start workout"

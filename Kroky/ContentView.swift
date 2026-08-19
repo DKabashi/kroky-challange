@@ -34,13 +34,13 @@ struct ContentViewPreview: PreviewProvider {
 private struct PreviewWorkoutRepository: WorkoutProviding {
     func fetchWorkout() throws -> Workout {
         Workout(
-            id: "preview",
+            id: "pilates-workout-preview",
             eyebrow: "Today",
-            title: "Standing balance flow",
+            title: "Pilates workout",
             heroImageName: "WorkoutHero",
             overview: WorkoutOverview(
                 title: "In today’s workout",
-                description: "Slow standing moves that tone legs and improve balance, all supported by the wall. No mat, no jumping, kind to your knees.",
+                description: "Four beginner-friendly Pilates exercises focused on strength and control. Complete each 15-second move twice.",
                 metrics: [
                     WorkoutMetric(value: "8 min", label: "Duration"),
                     WorkoutMetric(value: "Light", label: "Intensity"),
@@ -49,10 +49,10 @@ private struct PreviewWorkoutRepository: WorkoutProviding {
             ),
             roundCount: 2,
             exercises: [
-                WorkoutExercise(id: "1", title: "Wall-supported standing march", duration: "1 min", imageName: "WorkoutHero"),
-                WorkoutExercise(id: "2", title: "Arm reach and calf raise", duration: "1 min", imageName: "WorkoutHero"),
-                WorkoutExercise(id: "3", title: "Front kick hold, left", duration: "1 min", imageName: "WorkoutHero"),
-                WorkoutExercise(id: "4", title: "Front kick hold, right", duration: "1 min", imageName: "WorkoutHero")
+                WorkoutExercise(id: "p-001", title: "Standing Squats", duration: "15 sec", durationSeconds: 15.042, imageName: "WorkoutHero", videoURL: URL(string: "https://workoutvideos.vercel.app/p-001.mp4")!, videoVersion: 1, kcalPerMinute: 12.1, style: "Pilates", difficulty: 1),
+                WorkoutExercise(id: "p-002", title: "Flat Ab Crunches", duration: "15 sec", durationSeconds: 15.042, imageName: "WorkoutHero", videoURL: URL(string: "https://workoutvideos.vercel.app/p-002.mp4")!, videoVersion: 1, kcalPerMinute: 14, style: "Pilates", difficulty: 1),
+                WorkoutExercise(id: "p-003", title: "Pushups", duration: "15 sec", durationSeconds: 15.042, imageName: "WorkoutHero", videoURL: URL(string: "https://workoutvideos.vercel.app/p-003.mp4")!, videoVersion: 1, kcalPerMinute: 12.5, style: "Pilates", difficulty: 1),
+                WorkoutExercise(id: "p-004", title: "Lunges", duration: "15 sec", durationSeconds: 15.042, imageName: "WorkoutHero", videoURL: URL(string: "https://workoutvideos.vercel.app/p-004.mp4")!, videoVersion: 1, kcalPerMinute: 11.4, style: "Pilates", difficulty: 1)
             ],
             callToActionTitle: "Start workout"
         )
