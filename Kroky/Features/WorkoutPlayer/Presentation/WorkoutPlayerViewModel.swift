@@ -26,7 +26,11 @@ final class WorkoutPlayerViewModel: ObservableObject {
     private let segments: [WorkoutSegment]
     private let cache: any VideoCaching
     private let progressStore: any WorkoutProgressStoring
+    private let sound: any WorkoutSoundPlaying
     private var workoutProgress: WorkoutProgress
+
+    /// Countdown values (…3, 2, 1) that get an audible pip before the "go" cue.
+    private let countdownCueLeadIn = 3
 
     private var preparationTask: Task<Void, Never>?
     private var countdownTask: Task<Void, Never>?
@@ -46,12 +50,14 @@ final class WorkoutPlayerViewModel: ObservableObject {
     init(
         workout: Workout,
         cache: any VideoCaching,
-        progressStore: any WorkoutProgressStoring
+        progressStore: any WorkoutProgressStoring,
+        sound: any WorkoutSoundPlaying = CountdownSoundPlayer.shared
     ) {
         self.workout = workout
         self.segments = workout.playbackSegments
         self.cache = cache
         self.progressStore = progressStore
+        self.sound = sound
 
         var savedProgress = progressStore.progress(for: workout.id)
         let validSegmentIDs = Set(workout.playbackSegments.map(\.id))
@@ -161,6 +167,7 @@ final class WorkoutPlayerViewModel: ObservableObject {
         guard !hasStarted, !segments.isEmpty else { return }
         hasStarted = true
         isStopped = false
+        sound.prepare()
         workoutProgress.hasStarted = true
         workoutProgress.currentSegmentID = currentSegment?.id
         workoutProgress.completedAt = nil
@@ -317,7 +324,15 @@ final class WorkoutPlayerViewModel: ObservableObject {
         countdownRemaining = seconds
         phase = .countdown
         isPaused = false
+        cueTick(for: seconds)
         runCountdown()
+    }
+
+    /// Pips on each of the final lead-in seconds so the ticks stay in step with
+    /// the on-screen number, whatever the countdown's length.
+    private func cueTick(for value: Int) {
+        guard (1...countdownCueLeadIn).contains(value) else { return }
+        sound.play(.countdownTick)
     }
 
     private func runCountdown() {
@@ -334,6 +349,7 @@ final class WorkoutPlayerViewModel: ObservableObject {
 
                 if self.countdownRemaining > 1 {
                     self.countdownRemaining -= 1
+                    self.cueTick(for: self.countdownRemaining)
                 } else {
                     self.countdownRemaining = 0
                     self.beginPlayback()
@@ -347,6 +363,7 @@ final class WorkoutPlayerViewModel: ObservableObject {
         countdownTask = nil
         phase = .playing
         isPaused = false
+        sound.play(.go)
         player.play()
     }
 
