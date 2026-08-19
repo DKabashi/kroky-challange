@@ -5,7 +5,7 @@ struct ContentView: View {
     private let progressStore: any WorkoutProgressStoring
 
     init(repository: any WorkoutProviding = BundleWorkoutRepository()) {
-        let progressStore = UserDefaultsWorkoutProgressStore()
+        let progressStore = InMemoryWorkoutProgressStore()
         self.progressStore = progressStore
         _viewModel = StateObject(
             wrappedValue: WorkoutDetailViewModel(

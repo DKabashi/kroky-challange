@@ -33,13 +33,10 @@ final class WorkoutDetailViewModel: ObservableObject {
         )
     }
 
-    func prepareForPlayback() {
+    func resetProgress() {
         guard let workout else { return }
-
-        if progressState == .completed {
-            progressStore.resetProgress(for: workout.id)
-            refreshProgress()
-        }
+        progressStore.resetProgress(for: workout.id)
+        refreshProgress()
     }
 
     func refreshProgress() {

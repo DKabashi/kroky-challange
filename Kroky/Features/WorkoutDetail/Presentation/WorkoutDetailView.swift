@@ -131,8 +131,13 @@ struct WorkoutDetailView: View {
 
     private var primaryButton: some View {
         Button {
-            viewModel.prepareForPlayback()
-            isPlayerPresented = true
+            if viewModel.progressState == .completed {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    viewModel.resetProgress()
+                }
+            } else {
+                isPlayerPresented = true
+            }
         } label: {
             HStack(spacing: 12) {
                 KrokyIconView(
@@ -171,7 +176,7 @@ struct WorkoutDetailView: View {
         case .inProgress:
             "Resumes the workout from the last exercise"
         case .completed:
-            "Clears previous progress and starts again"
+            "Clears previous progress and returns to the start state"
         }
     }
 }
