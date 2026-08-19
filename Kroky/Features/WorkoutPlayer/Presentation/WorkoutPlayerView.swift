@@ -32,7 +32,13 @@ struct WorkoutPlayerView: View {
                         onExit: exitWorkout
                     )
                 case .completed:
-                    WorkoutCompleteView(onDone: exitWorkout)
+                    WorkoutSummaryView(
+                        viewModel: WorkoutSummaryViewModel(
+                            summary: viewModel.completionSummary,
+                            mascotVideoName: "rosy-peak-video",
+                            onAdvance: finishAndReturnToStart
+                        )
+                    )
                 case .preparing, .countdown, .playing:
                     playerContent(safeAreaInsets: .init(top: geometry.safeAreaInsets.top + 52, leading: geometry.safeAreaInsets.leading, bottom: geometry.safeAreaInsets.bottom, trailing: geometry.safeAreaInsets.trailing))
                 }
@@ -225,6 +231,11 @@ struct WorkoutPlayerView: View {
         viewModel.stop()
         dismiss()
     }
+
+    private func finishAndReturnToStart() {
+        viewModel.resetForFreshStart()
+        dismiss()
+    }
 }
 
 private struct WorkoutProgressBar: View {
@@ -393,29 +404,3 @@ private struct WorkoutVideoErrorView: View {
     }
 }
 
-private struct WorkoutCompleteView: View {
-    let onDone: () -> Void
-
-    var body: some View {
-        VStack(spacing: 18) {
-            Image(systemName: "checkmark")
-                .font(.system(size: 40, weight: .bold))
-                .foregroundStyle(KrokyColor.charcoal)
-                .frame(width: 92, height: 92)
-                .background(KrokyColor.petal, in: Circle())
-
-            Text("Workout complete")
-                .font(.system(size: 28, weight: .bold))
-                .foregroundStyle(.white)
-
-            Button("Done", action: onDone)
-                .font(.system(size: 17, weight: .bold))
-                .foregroundStyle(KrokyColor.charcoal)
-                .frame(maxWidth: .infinity)
-                .frame(height: 54)
-                .background(KrokyColor.porcelain, in: Capsule())
-                .padding(.horizontal, 42)
-                .padding(.top, 12)
-        }
-    }
-}

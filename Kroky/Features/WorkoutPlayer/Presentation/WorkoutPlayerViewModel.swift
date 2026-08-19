@@ -100,6 +100,21 @@ final class WorkoutPlayerViewModel: ObservableObject {
 
     var totalSegmentCount: Int { segments.count }
 
+    /// A display-ready snapshot of the finished workout for the summary screen.
+    var completionSummary: WorkoutCompletionSummary {
+        let completedCount = segments.filter {
+            workoutProgress.completedSegmentIDs.contains($0.id)
+        }.count
+
+        return WorkoutCompletionSummary(
+            workoutTitle: workout.title,
+            durationSeconds: elapsedActiveSeconds,
+            caloriesBurned: caloriesBurned,
+            completedExerciseCount: completedCount,
+            totalExerciseCount: segments.count
+        )
+    }
+
     var currentSegment: WorkoutSegment? {
         guard segments.indices.contains(currentSegmentIndex) else { return nil }
         return segments[currentSegmentIndex]
@@ -220,6 +235,19 @@ final class WorkoutPlayerViewModel: ObservableObject {
         removeCurrentItemObservers()
         player.pause()
         player.replaceCurrentItem(with: nil)
+    }
+
+    /// Clears all saved progress so the workout returns to its clean, not-started
+    /// state. Used by the summary screen's "Next" action.
+    func resetForFreshStart() {
+        isStopped = true
+        preparationTask?.cancel()
+        countdownTask?.cancel()
+        removeCurrentItemObservers()
+        player.pause()
+        player.replaceCurrentItem(with: nil)
+        progressStore.resetProgress(for: workout.id)
+        workoutProgress = .notStarted(workoutID: workout.id)
     }
 
     private func prepareCurrentSegment(
