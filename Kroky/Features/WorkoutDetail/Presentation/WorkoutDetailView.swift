@@ -6,10 +6,12 @@ struct WorkoutDetailView: View {
         static let sheetOverlap: CGFloat = 24
         static let horizontalInset: CGFloat = 22
         static let buttonHeight: CGFloat = 52
-        static let heroTitleHeight: CGFloat = 68
+        static let heroTitleHeight: CGFloat = 78
     }
 
     let workout: Workout
+    @ObservedObject var viewModel: WorkoutDetailViewModel
+    let progressStore: any WorkoutProgressStoring
 
     @State private var scrollOffset: CGFloat = 0
     @State private var isPlayerPresented = false
@@ -41,7 +43,7 @@ struct WorkoutDetailView: View {
                     scrollOffset = max(newOffset, 0)
                 }
 
-                startButton
+                primaryButton
                     .frame(maxHeight: .infinity, alignment: .bottom)
                     .padding(.horizontal, Layout.horizontalInset)
                     .padding(.bottom, 16)
@@ -53,8 +55,11 @@ struct WorkoutDetailView: View {
         .task(id: workout.id) {
             await RemoteVideoCache.shared.prefetch(workout.videoResources)
         }
-        .fullScreenCover(isPresented: $isPlayerPresented) {
-            WorkoutPlayerView(workout: workout)
+        .fullScreenCover(isPresented: $isPlayerPresented, onDismiss: viewModel.refreshProgress) {
+            WorkoutPlayerView(
+                workout: workout,
+                progressStore: progressStore
+            )
         }
     }
 
@@ -74,10 +79,14 @@ struct WorkoutDetailView: View {
                 .frame(height: safeAreaTop)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(workout.eyebrow)
-                    .font(.system(size: 12, weight: .heavy))
-                    .tracking(0.6)
-                    .textCase(.uppercase)
+                if viewModel.progressState == .notStarted {
+                    Text(workout.eyebrow)
+                        .font(.system(size: 12, weight: .heavy))
+                        .tracking(0.6)
+                        .textCase(.uppercase)
+                } else {
+                    WorkoutStatusBadge(state: viewModel.progressState)
+                }
 
                 Text(workout.title)
                     .font(.system(size: 28, weight: .bold))
@@ -102,7 +111,9 @@ struct WorkoutDetailView: View {
             WorkoutSummaryCard(overview: workout.displayOverview)
             ExerciseListCard(
                 summary: workout.exerciseSummary,
-                exercises: workout.exercises
+                exercises: workout.exercises,
+                progressState: viewModel.progressState,
+                completedExerciseIDs: viewModel.completedExerciseIDs
             )
         }
         .padding(.top, 22)
@@ -118,13 +129,19 @@ struct WorkoutDetailView: View {
         )
     }
 
-    private var startButton: some View {
+    private var primaryButton: some View {
         Button {
+            viewModel.prepareForPlayback()
             isPlayerPresented = true
         } label: {
             HStack(spacing: 12) {
-                KrokyIconView(icon: .play, size: 16, weight: .bold, filled: true)
-                Text(workout.callToActionTitle)
+                KrokyIconView(
+                    icon: viewModel.progressState == .completed ? .restart : .play,
+                    size: 16,
+                    weight: .bold,
+                    filled: true
+                )
+                Text(primaryButtonTitle)
                     .font(.system(size: 17, weight: .bold))
             }
             .foregroundStyle(KrokyColor.white)
@@ -133,7 +150,52 @@ struct WorkoutDetailView: View {
             .background(KrokyColor.charcoal, in: Capsule())
         }
         .buttonStyle(.plain)
-        .accessibilityHint("Opens the workout player")
+        .accessibilityHint(primaryButtonAccessibilityHint)
+    }
+
+    private var primaryButtonTitle: String {
+        switch viewModel.progressState {
+        case .notStarted:
+            workout.callToActionTitle
+        case .inProgress:
+            "Continue workout"
+        case .completed:
+            "Restart workout"
+        }
+    }
+
+    private var primaryButtonAccessibilityHint: String {
+        switch viewModel.progressState {
+        case .notStarted:
+            "Starts the workout from the beginning"
+        case .inProgress:
+            "Resumes the workout from the last exercise"
+        case .completed:
+            "Clears previous progress and starts again"
+        }
+    }
+}
+
+private struct WorkoutStatusBadge: View {
+    let state: WorkoutProgressState
+
+    var body: some View {
+        HStack(spacing: 7) {
+            Image(systemName: state == .completed ? "checkmark" : "clock.fill")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(KrokyColor.white)
+                .frame(width: 22, height: 22)
+                .background(KrokyColor.deepRoseText, in: Circle())
+
+            Text(state == .completed ? "Completed" : "In progress")
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(KrokyColor.charcoal)
+        }
+        .padding(.leading, 6)
+        .padding(.trailing, 11)
+        .frame(height: 30)
+        .background(KrokyColor.porcelain, in: Capsule())
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -227,6 +289,8 @@ private struct WorkoutMetricView: View {
 private struct ExerciseListCard: View {
     let summary: String
     let exercises: [WorkoutExercise]
+    let progressState: WorkoutProgressState
+    let completedExerciseIDs: Set<String>
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -235,7 +299,11 @@ private struct ExerciseListCard: View {
                 .padding(.bottom, 8)
 
             ForEach(Array(exercises.enumerated()), id: \.element.id) { index, exercise in
-                ExerciseRow(exercise: exercise)
+                ExerciseRow(
+                    exercise: exercise,
+                    showsProgress: progressState != .notStarted,
+                    isCompleted: completedExerciseIDs.contains(exercise.id)
+                )
 
                 if index < exercises.count - 1 {
                     Divider()
@@ -258,6 +326,8 @@ private struct ExerciseListCard: View {
 
 private struct ExerciseRow: View {
     let exercise: WorkoutExercise
+    let showsProgress: Bool
+    let isCompleted: Bool
 
     var body: some View {
         HStack(spacing: 12) {
@@ -278,8 +348,36 @@ private struct ExerciseRow: View {
             }
 
             Spacer(minLength: 0)
+
+            if showsProgress {
+                ExerciseProgressIndicator(isCompleted: isCompleted)
+            }
         }
         .frame(minHeight: 70)
         .accessibilityElement(children: .combine)
+    }
+}
+
+private struct ExerciseProgressIndicator: View {
+    let isCompleted: Bool
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(isCompleted ? KrokyColor.petalTint : .clear)
+
+            Circle()
+                .stroke(
+                    isCompleted ? Color.clear : KrokyColor.charcoal.opacity(0.20),
+                    lineWidth: 1.5
+                )
+
+            if isCompleted {
+                KrokyIconView(icon: .check, size: 12, weight: .bold)
+                    .foregroundStyle(KrokyColor.deepRoseText)
+            }
+        }
+        .frame(width: 28, height: 28)
+        .accessibilityLabel(isCompleted ? "Completed" : "Not completed")
     }
 }

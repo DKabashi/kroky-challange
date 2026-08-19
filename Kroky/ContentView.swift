@@ -2,17 +2,40 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var viewModel: WorkoutDetailViewModel
+    private let progressStore: any WorkoutProgressStoring
 
     init(repository: any WorkoutProviding = BundleWorkoutRepository()) {
+        let progressStore = UserDefaultsWorkoutProgressStore()
+        self.progressStore = progressStore
         _viewModel = StateObject(
-            wrappedValue: WorkoutDetailViewModel(repository: repository)
+            wrappedValue: WorkoutDetailViewModel(
+                repository: repository,
+                progressStore: progressStore
+            )
+        )
+    }
+
+    init(
+        repository: any WorkoutProviding,
+        progressStore: any WorkoutProgressStoring
+    ) {
+        self.progressStore = progressStore
+        _viewModel = StateObject(
+            wrappedValue: WorkoutDetailViewModel(
+                repository: repository,
+                progressStore: progressStore
+            )
         )
     }
 
     var body: some View {
         Group {
             if let workout = viewModel.workout {
-                WorkoutDetailView(workout: workout)
+                WorkoutDetailView(
+                    workout: workout,
+                    viewModel: viewModel,
+                    progressStore: progressStore
+                )
             } else {
                 ContentUnavailableView(
                     "Workout unavailable",

@@ -27,6 +27,7 @@ enum KrokyIcon: String, CaseIterable, Identifiable {
     case weight
     case noMeals
     case play
+    case restart
     case restaurant
     case satisfied
     case stressed
@@ -64,6 +65,7 @@ enum KrokyIcon: String, CaseIterable, Identifiable {
         case .weight: "scalemass"
         case .noMeals: "fork.knife.circle"
         case .play: filled ? "play.fill" : "play"
+        case .restart: "arrow.counterclockwise"
         case .restaurant: "fork.knife"
         case .satisfied: "face.smiling"
         case .stressed: "face.dashed"

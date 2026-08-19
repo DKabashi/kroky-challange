@@ -7,10 +7,15 @@ struct WorkoutPlayerView: View {
 
     init(
         workout: Workout,
-        cache: any VideoCaching = RemoteVideoCache.shared
+        cache: any VideoCaching = RemoteVideoCache.shared,
+        progressStore: any WorkoutProgressStoring
     ) {
         _viewModel = StateObject(
-            wrappedValue: WorkoutPlayerViewModel(workout: workout, cache: cache)
+            wrappedValue: WorkoutPlayerViewModel(
+                workout: workout,
+                cache: cache,
+                progressStore: progressStore
+            )
         )
     }
 

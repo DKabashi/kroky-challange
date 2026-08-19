@@ -25,6 +25,8 @@ final class WorkoutPlayerViewModel: ObservableObject {
     private let workout: Workout
     private let segments: [WorkoutSegment]
     private let cache: any VideoCaching
+    private let progressStore: any WorkoutProgressStoring
+    private var workoutProgress: WorkoutProgress
 
     private var preparationTask: Task<Void, Never>?
     private var countdownTask: Task<Void, Never>?
@@ -41,10 +43,43 @@ final class WorkoutPlayerViewModel: ObservableObject {
     private var hasStarted = false
     private var isStopped = false
 
-    init(workout: Workout, cache: any VideoCaching) {
+    init(
+        workout: Workout,
+        cache: any VideoCaching,
+        progressStore: any WorkoutProgressStoring
+    ) {
         self.workout = workout
         self.segments = workout.playbackSegments
         self.cache = cache
+        self.progressStore = progressStore
+
+        var savedProgress = progressStore.progress(for: workout.id)
+        let validSegmentIDs = Set(workout.playbackSegments.map(\.id))
+        savedProgress.completedSegmentIDs.formIntersection(validSegmentIDs)
+        self.workoutProgress = savedProgress
+
+        if
+            let currentSegmentID = savedProgress.currentSegmentID,
+            let savedIndex = workout.playbackSegments.firstIndex(where: { $0.id == currentSegmentID })
+        {
+            currentSegmentIndex = savedIndex
+        } else if let firstIncompleteIndex = workout.playbackSegments.firstIndex(
+            where: { !savedProgress.completedSegmentIDs.contains($0.id) }
+        ) {
+            currentSegmentIndex = firstIncompleteIndex
+        }
+
+        let completedSegments = workout.playbackSegments.filter {
+            savedProgress.completedSegmentIDs.contains($0.id)
+        }
+        completedElapsedSeconds = completedSegments.reduce(0) {
+            $0 + $1.exercise.durationSeconds
+        }
+        completedCalories = completedSegments.reduce(0) {
+            $0 + ($1.exercise.kcalPerMinute * $1.exercise.durationSeconds / 60)
+        }
+        elapsedActiveSeconds = completedElapsedSeconds
+        caloriesBurned = completedCalories
 
         player.actionAtItemEnd = .pause
         player.automaticallyWaitsToMinimizeStalling = true
@@ -101,7 +136,8 @@ final class WorkoutPlayerViewModel: ObservableObject {
     }
 
     func progress(for segmentIndex: Int) -> Double {
-        if segmentIndex < currentSegmentIndex { return 1 }
+        guard segments.indices.contains(segmentIndex) else { return 0 }
+        if workoutProgress.completedSegmentIDs.contains(segments[segmentIndex].id) { return 1 }
         if segmentIndex == currentSegmentIndex { return segmentProgress }
         return 0
     }
@@ -110,6 +146,10 @@ final class WorkoutPlayerViewModel: ObservableObject {
         guard !hasStarted, !segments.isEmpty else { return }
         hasStarted = true
         isStopped = false
+        workoutProgress.hasStarted = true
+        workoutProgress.currentSegmentID = currentSegment?.id
+        workoutProgress.completedAt = nil
+        saveProgress()
         prepareCurrentSegment(countdownSeconds: 10, resumeAt: 0)
     }
 
@@ -147,6 +187,8 @@ final class WorkoutPlayerViewModel: ObservableObject {
         guard currentSegmentIndex > 0 else { return }
         commitCurrentProgress(useFullDuration: false)
         currentSegmentIndex -= 1
+        workoutProgress.currentSegmentID = currentSegment?.id
+        saveProgress()
         prepareCurrentSegment(countdownSeconds: 3, resumeAt: 0)
     }
 
@@ -169,6 +211,10 @@ final class WorkoutPlayerViewModel: ObservableObject {
     func stop() {
         guard !isStopped else { return }
         isStopped = true
+        if workoutProgress.state(in: workout) != .completed {
+            workoutProgress.currentSegmentID = currentSegment?.id
+            saveProgress()
+        }
         preparationTask?.cancel()
         countdownTask?.cancel()
         removeCurrentItemObservers()
@@ -283,12 +329,18 @@ final class WorkoutPlayerViewModel: ObservableObject {
     }
 
     private func advanceToNextSegment() {
+        if let currentSegment {
+            workoutProgress.completedSegmentIDs.insert(currentSegment.id)
+        }
+
         guard currentSegmentIndex + 1 < segments.count else {
             completeWorkout()
             return
         }
 
         currentSegmentIndex += 1
+        workoutProgress.currentSegmentID = currentSegment?.id
+        saveProgress()
         prepareCurrentSegment(countdownSeconds: 3, resumeAt: 0)
     }
 
@@ -300,6 +352,11 @@ final class WorkoutPlayerViewModel: ObservableObject {
         player.replaceCurrentItem(with: nil)
         segmentProgress = 1
         isPaused = false
+        workoutProgress.hasStarted = true
+        workoutProgress.completedSegmentIDs.formUnion(segments.map(\.id))
+        workoutProgress.currentSegmentID = nil
+        workoutProgress.completedAt = Date()
+        saveProgress()
         phase = .completed
     }
 
@@ -385,6 +442,10 @@ final class WorkoutPlayerViewModel: ObservableObject {
         currentPosition = 0
         currentItemDuration = 0
         segmentProgress = 0
+    }
+
+    private func saveProgress() {
+        progressStore.save(workoutProgress)
     }
 }
 
