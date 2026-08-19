@@ -29,7 +29,7 @@ struct WorkoutPlayerView: View {
                 case .completed:
                     WorkoutCompleteView(onDone: exitWorkout)
                 case .preparing, .countdown, .playing:
-                    playerContent(safeAreaInsets: geometry.safeAreaInsets)
+                    playerContent(safeAreaInsets: .init(top: geometry.safeAreaInsets.top + 52, leading: geometry.safeAreaInsets.leading, bottom: geometry.safeAreaInsets.bottom, trailing: geometry.safeAreaInsets.trailing))
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
